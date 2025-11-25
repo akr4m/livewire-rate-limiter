@@ -1,6 +1,6 @@
 # Laravel Livewire Rate Limiter
 
-A flexible, configurable rate limiting package for Laravel Livewire v4 components with support for multiple strategies and storage backends.
+A flexible, configurable rate limiting package for Laravel Livewire components with support for multiple strategies and storage backends.
 
 ## Features
 
@@ -9,7 +9,6 @@ A flexible, configurable rate limiting package for Laravel Livewire v4 component
 - 💾 **Multiple Storage Backends**: Redis, Database, Array (via Laravel's cache abstraction)
 - 🔧 **Developer-Friendly API**: Simple traits, attributes, and helper methods
 - 🛡️ **Security-First**: IP-based, user-based, session-based, or custom key identification
-- ⚡ **Livewire v4 Compatible**: Full support for the latest Livewire beta
 - 🎨 **Customizable Responses**: Validation errors, exceptions, events, or silent handling
 - 🧪 **Comprehensive Testing**: PHPUnit and Pest test suites included
 
@@ -479,12 +478,6 @@ Rate limit navigation between steps to prevent automation.
 - Monitor cache key proliferation
 
 ## Edge Cases & Caveats
-
-### Livewire v4 Beta Considerations
-
-- Some Livewire v4 features may change before stable release
-- Test thoroughly when upgrading Livewire versions
-- Monitor Livewire changelog for breaking changes
 
 ### Cache Driver Limitations
 
