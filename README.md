@@ -2,10 +2,6 @@
 
 A flexible, configurable rate limiting package for Laravel Livewire v4 components with support for multiple strategies and storage backends.
 
-[![Latest Version on Packagist](https://img.shields.io/packagist/v/akr4m/livewire-rate-limiter.svg?style=flat-square)](https://packagist.org/packages/akr4m/livewire-rate-limiter)
-[![Total Downloads](https://img.shields.io/packagist/dt/akr4m/livewire-rate-limiter.svg?style=flat-square)](https://packagist.org/packages/akr4m/livewire-rate-limiter)
-[![License](https://img.shields.io/packagist/l/akr4m/livewire-rate-limiter.svg?style=flat-square)](https://packagist.org/packages/akr4m/livewire-rate-limiter)
-
 ## Features
 
 - 🚀 **Multiple Rate Limiting Strategies**: Fixed Window, Sliding Window, and Leaky Bucket
@@ -501,45 +497,3 @@ Rate limit navigation between steps to prevent automation.
 - Ensure proper IP forwarding headers are configured
 - Session affinity may be required for session-based limiting
 - Consider using Redis for distributed rate limiting
-
-## Contributing
-
-Contributions are welcome! Please see [CONTRIBUTING.md](CONTRIBUTING.md) for details.
-
-## Security
-
-If you discover any security-related issues, please email <security@example.com> instead of using the issue tracker.
-
-## Credits
-
-- [Your Name](https://github.com/yourusername)
-- [All Contributors](../../contributors)
-
-## License
-
-The MIT License (MIT). Please see [License File](LICENSE.md) for more information.
-
-## Support
-
-For support, please open an issue on GitHub or contact <support@example.com>.
-
-## Roadmap
-
-- [ ] Token bucket algorithm implementation
-- [ ] GraphQL support for Lighthouse
-- [ ] Rate limit analytics dashboard
-- [ ] Distributed rate limiting improvements
-- [ ] Machine learning-based adaptive limits
-- [ ] WebSocket support for Livewire v4
-
----
-
-**Package Name Suggestions:**
-
-- `livewire-rate-limiter` (straightforward)
-- `livewire-throttle` (concise)
-- `livewire-guardian` (branded)
-- `wire-limiter` (short)
-- `livewire-gatekeeper` (descriptive)
-
-We recommend **`livewire-rate-limiter`** for clarity and discoverability.
