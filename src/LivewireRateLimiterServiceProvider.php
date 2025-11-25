@@ -54,10 +54,6 @@ class LivewireRateLimiterServiceProvider extends ServiceProvider
             $this->publishes([
                 __DIR__ . '/../config/livewire-rate-limiter.php' => config_path('livewire-rate-limiter.php'),
             ], 'livewire-rate-limiter-config');
-
-            $this->publishes([
-                __DIR__ . '/../resources/lang' => resource_path('lang/vendor/livewire-rate-limiter'),
-            ], 'livewire-rate-limiter-lang');
         }
     }
 
