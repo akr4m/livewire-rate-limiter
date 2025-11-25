@@ -40,7 +40,7 @@ return [
         'default' => [
             'attempts' => 60,
             'decay_minutes' => 1,
-            'strategy' => 'fixed_window', // fixed_window, sliding_window, leaky_bucket
+            'strategy' => 'fixed_window', // fixed_window, sliding_window, token_bucket
         ],
 
         'strict' => [
@@ -53,6 +53,30 @@ return [
             'attempts' => 100,
             'decay_minutes' => 1,
             'strategy' => 'fixed_window',
+        ],
+
+        // Form submission limiter - use with #[RateLimit(limiter: 'form')]
+        'form' => [
+            'attempts' => 5,
+            'decay_minutes' => 1,
+            'strategy' => 'fixed_window',
+            'response_type' => 'validation_error',
+        ],
+
+        // Action/button click limiter - use with #[RateLimit(limiter: 'action')]
+        'action' => [
+            'attempts' => 10,
+            'decay_minutes' => 1,
+            'strategy' => 'fixed_window',
+            'response_type' => 'notification',
+        ],
+
+        // API-like endpoint limiter - use with #[RateLimit(limiter: 'api')]
+        'api' => [
+            'attempts' => 60,
+            'decay_minutes' => 1,
+            'strategy' => 'sliding_window',
+            'response_type' => 'exception',
         ],
 
         'auth' => [
@@ -131,8 +155,8 @@ return [
 
     'events' => [
         'enabled' => true,
-        'rate_limit_exceeded' => \LivewireRateLimiter\Events\RateLimitExceeded::class,
-        'rate_limit_attempted' => \LivewireRateLimiter\Events\RateLimitAttempted::class,
+        'rate_limit_exceeded' => \Akr4m\LivewireRateLimiter\Events\RateLimitExceeded::class,
+        'rate_limit_attempted' => \Akr4m\LivewireRateLimiter\Events\RateLimitAttempted::class,
     ],
 
     /*

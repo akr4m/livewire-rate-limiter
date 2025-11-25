@@ -6,8 +6,8 @@ use Illuminate\Cache\CacheManager;
 use Illuminate\Support\Carbon;
 use Akr4m\LivewireRateLimiter\Contracts\RateLimiterInterface;
 use Akr4m\LivewireRateLimiter\Strategies\FixedWindowStrategy;
-use Akr4m\LivewireRateLimiter\Strategies\LeakyBucketStrategy;
 use Akr4m\LivewireRateLimiter\Strategies\SlidingWindowStrategy;
+use Akr4m\LivewireRateLimiter\Strategies\TokenBucketStrategy;
 
 class RateLimiterManager implements RateLimiterInterface
 {
@@ -179,7 +179,7 @@ class RateLimiterManager implements RateLimiterInterface
 
         $this->strategies['fixed_window'] = new FixedWindowStrategy($cacheStore);
         $this->strategies['sliding_window'] = new SlidingWindowStrategy($cacheStore);
-        $this->strategies['leaky_bucket'] = new LeakyBucketStrategy($cacheStore);
+        $this->strategies['token_bucket'] = new TokenBucketStrategy($cacheStore);
     }
 
     /**

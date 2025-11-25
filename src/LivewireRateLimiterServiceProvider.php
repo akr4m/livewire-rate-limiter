@@ -5,7 +5,6 @@ namespace Akr4m\LivewireRateLimiter;
 use Illuminate\Support\ServiceProvider;
 use Livewire\Livewire;
 use Akr4m\LivewireRateLimiter\Http\Middleware\LivewireRateLimitMiddleware;
-use Akr4m\LivewireRateLimiter\Listeners\ComponentRateLimitListener;
 
 class LivewireRateLimiterServiceProvider extends ServiceProvider
 {
@@ -31,6 +30,12 @@ class LivewireRateLimiterServiceProvider extends ServiceProvider
         $this->app->singleton(Resolvers\KeyResolver::class, function ($app) {
             return new Resolvers\KeyResolver($app['request']);
         });
+
+        // Register interface binding
+        $this->app->bind(
+            Contracts\RateLimiterInterface::class,
+            RateLimiterManager::class
+        );
     }
 
     /**
@@ -40,7 +45,6 @@ class LivewireRateLimiterServiceProvider extends ServiceProvider
     {
         $this->publishConfig();
         $this->registerMiddleware();
-        $this->registerLivewireHooks();
         $this->registerCommands();
     }
 
@@ -72,24 +76,6 @@ class LivewireRateLimiterServiceProvider extends ServiceProvider
             Livewire::addPersistentMiddleware([
                 LivewireRateLimitMiddleware::class,
             ]);
-        }
-    }
-
-    /**
-     * Register Livewire lifecycle hooks.
-     */
-    protected function registerLivewireHooks(): void
-    {
-        // Listen to Livewire component lifecycle events
-        Livewire::listen('component.dehydrate', function ($component) {
-            app(ComponentRateLimitListener::class)->handle($component);
-        });
-
-        // Register custom Livewire directives for Blade
-        if (class_exists('Livewire\LivewireBladeDirectives')) {
-            Livewire::directive('rateLimit', function ($expression) {
-                return "<?php \$__rateLimitKey = {$expression}; ?>";
-            });
         }
     }
 

@@ -58,6 +58,8 @@ trait WithRateLimiting
                     'key' => $attribute->key,
                     'message' => $attribute->message,
                     'responseType' => $attribute->responseType,
+                    'perAction' => $attribute->perAction,
+                    'shareLimit' => $attribute->shareLimit,
                 ];
             }
         }
@@ -80,11 +82,14 @@ trait WithRateLimiting
                 'maxAttempts' => $attribute->maxAttempts,
                 'decayMinutes' => $attribute->decayMinutes,
                 'key' => $attribute->key,
-                'perAction' => $attribute->perAction ?? true,
+                'message' => $attribute->message,
+                'responseType' => $attribute->responseType,
+                'perAction' => $attribute->perAction,
+                'shareLimit' => $attribute->shareLimit,
             ];
         } elseif (property_exists($this, 'rateLimits')) {
             // Fallback to property configuration
-            $this->rateLimitConfig = $this->rateLimits;
+            $this->rateLimitConfig = array_merge(['enabled' => true], $this->rateLimits);
         }
     }
 
@@ -105,7 +110,12 @@ trait WithRateLimiting
      */
     protected function shouldCheckRateLimit(string $method): bool
     {
-        // Skip if rate limiting is disabled
+        // Check bypass first
+        if ($this->shouldBypassRateLimit()) {
+            return false;
+        }
+
+        // Skip if rate limiting is disabled globally
         if (!config('livewire-rate-limiter.component_defaults.enabled', true)) {
             return false;
         }
@@ -126,7 +136,7 @@ trait WithRateLimiting
     {
         $manager = app(RateLimiterManager::class);
         $key = $this->getRateLimitKey($method);
-        $config = $this->getRateLimitConfig($method);
+        $config = $this->getMergedRateLimitConfig($method);
 
         if ($config['useLaravelRateLimiter'] ?? false) {
             $this->checkLaravelRateLimit($key, $config);
@@ -165,7 +175,7 @@ trait WithRateLimiting
      */
     protected function getRateLimitKey(string $method): string
     {
-        $config = $this->getRateLimitConfig($method);
+        $config = $this->getMergedRateLimitConfig($method);
 
         if ($config['key'] ?? null) {
             return $this->resolveRateLimitKey($config['key'], $method);
@@ -213,11 +223,40 @@ trait WithRateLimiting
     }
 
     /**
+     * Get merged rate limit configuration (attribute + limiter config).
+     */
+    protected function getMergedRateLimitConfig(string $method): array
+    {
+        $config = $this->getRateLimitConfig($method);
+
+        // If using a named limiter, merge its config
+        if (!empty($config['limiter'])) {
+            $limiterConfig = config("livewire-rate-limiter.limiters.{$config['limiter']}", []);
+
+            // Map limiter config keys to our expected format
+            $mappedLimiterConfig = [
+                'maxAttempts' => $limiterConfig['attempts'] ?? null,
+                'decayMinutes' => $limiterConfig['decay_minutes'] ?? null,
+                'responseType' => $limiterConfig['response_type'] ?? null,
+            ];
+
+            // Merge: attribute values take precedence over limiter defaults
+            foreach ($mappedLimiterConfig as $key => $value) {
+                if ($value !== null && !isset($config[$key])) {
+                    $config[$key] = $value;
+                }
+            }
+        }
+
+        return $config;
+    }
+
+    /**
      * Handle rate limit exceeded.
      */
     protected function handleRateLimitExceeded(string $method, int $retryAfter): void
     {
-        $config = $this->getRateLimitConfig($method);
+        $config = $this->getMergedRateLimitConfig($method);
         $responseType = $config['responseType'] ?? config('livewire-rate-limiter.response_strategy', 'validation_error');
         $message = $this->getRateLimitMessage($retryAfter, $config['message'] ?? null);
 
@@ -259,17 +298,26 @@ trait WithRateLimiting
     protected function getRateLimitMessage(int $seconds, ?string $customMessage = null): string
     {
         if ($customMessage) {
-            return str_replace(':seconds', $seconds, $customMessage);
+            return str_replace([':seconds', ':minutes', ':hours'], [
+                $seconds,
+                ceil($seconds / 60),
+                ceil($seconds / 3600),
+            ], $customMessage);
         }
 
+        $messages = config('livewire-rate-limiter.messages', []);
+
         if ($seconds < 60) {
-            return trans('livewire-rate-limiter::messages.rate_limit_exceeded', ['seconds' => $seconds]);
+            $message = $messages['rate_limit_exceeded'] ?? 'Too many requests. Please try again in :seconds seconds.';
+            return str_replace(':seconds', (string) $seconds, $message);
         } elseif ($seconds < 3600) {
-            $minutes = ceil($seconds / 60);
-            return trans('livewire-rate-limiter::messages.rate_limit_exceeded_minutes', ['minutes' => $minutes]);
+            $minutes = (int) ceil($seconds / 60);
+            $message = $messages['rate_limit_exceeded_minutes'] ?? 'Too many requests. Please try again in :minutes minutes.';
+            return str_replace(':minutes', (string) $minutes, $message);
         } else {
-            $hours = ceil($seconds / 3600);
-            return trans('livewire-rate-limiter::messages.rate_limit_exceeded_hours', ['hours' => $hours]);
+            $hours = (int) ceil($seconds / 3600);
+            $message = $messages['rate_limit_exceeded_hours'] ?? 'Too many requests. Please try again in :hours hours.';
+            return str_replace(':hours', (string) $hours, $message);
         }
     }
 
@@ -280,7 +328,7 @@ trait WithRateLimiting
     {
         $manager = app(RateLimiterManager::class);
         $key = $this->getRateLimitKey($method);
-        $config = $this->getRateLimitConfig($method);
+        $config = $this->getMergedRateLimitConfig($method);
 
         return $manager->remaining($key, $config['limiter'] ?? null);
     }
@@ -292,7 +340,7 @@ trait WithRateLimiting
     {
         $manager = app(RateLimiterManager::class);
         $key = $this->getRateLimitKey($method);
-        $config = $this->getRateLimitConfig($method);
+        $config = $this->getMergedRateLimitConfig($method);
 
         $manager->reset($key, $config['limiter'] ?? null);
     }

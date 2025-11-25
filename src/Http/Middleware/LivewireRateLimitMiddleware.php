@@ -161,14 +161,19 @@ class LivewireRateLimitMiddleware
      */
     protected function getRateLimitMessage(int $seconds): string
     {
+        $messages = config('livewire-rate-limiter.messages', []);
+
         if ($seconds < 60) {
-            return trans('livewire-rate-limiter::messages.rate_limit_exceeded', ['seconds' => $seconds]);
+            $message = $messages['rate_limit_exceeded'] ?? 'Too many requests. Please try again in :seconds seconds.';
+            return str_replace(':seconds', (string) $seconds, $message);
         } elseif ($seconds < 3600) {
-            $minutes = ceil($seconds / 60);
-            return trans('livewire-rate-limiter::messages.rate_limit_exceeded_minutes', ['minutes' => $minutes]);
+            $minutes = (int) ceil($seconds / 60);
+            $message = $messages['rate_limit_exceeded_minutes'] ?? 'Too many requests. Please try again in :minutes minutes.';
+            return str_replace(':minutes', (string) $minutes, $message);
         } else {
-            $hours = ceil($seconds / 3600);
-            return trans('livewire-rate-limiter::messages.rate_limit_exceeded_hours', ['hours' => $hours]);
+            $hours = (int) ceil($seconds / 3600);
+            $message = $messages['rate_limit_exceeded_hours'] ?? 'Too many requests. Please try again in :hours hours.';
+            return str_replace(':hours', (string) $hours, $message);
         }
     }
 }
