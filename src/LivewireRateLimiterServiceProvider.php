@@ -42,7 +42,6 @@ class LivewireRateLimiterServiceProvider extends ServiceProvider
         $this->registerMiddleware();
         $this->registerLivewireHooks();
         $this->registerCommands();
-        $this->loadTranslations();
     }
 
     /**
@@ -105,13 +104,5 @@ class LivewireRateLimiterServiceProvider extends ServiceProvider
                 Commands\ShowRateLimitsCommand::class,
             ]);
         }
-    }
-
-    /**
-     * Load translation files.
-     */
-    protected function loadTranslations(): void
-    {
-        $this->loadTranslationsFrom(__DIR__ . '/../resources/lang', 'livewire-rate-limiter');
     }
 }
