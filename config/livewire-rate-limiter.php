@@ -196,7 +196,7 @@ return [
     */
 
     'bypass' => [
-        'environments' => ['local', 'testing'],
+        'environments' => ['testing'],
         'ips' => [],
         'user_ids' => [],
         'callback' => null, // Custom bypass logic callback

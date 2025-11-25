@@ -2,9 +2,11 @@
 
 namespace Akr4m\LivewireRateLimiter;
 
-use Illuminate\Support\ServiceProvider;
-use Livewire\Livewire;
+use Akr4m\LivewireRateLimiter\Hooks\RateLimitComponentHook;
 use Akr4m\LivewireRateLimiter\Http\Middleware\LivewireRateLimitMiddleware;
+use Illuminate\Support\ServiceProvider;
+use Livewire\ComponentHookRegistry;
+use Livewire\Livewire;
 
 class LivewireRateLimiterServiceProvider extends ServiceProvider
 {
@@ -46,6 +48,15 @@ class LivewireRateLimiterServiceProvider extends ServiceProvider
         $this->publishConfig();
         $this->registerMiddleware();
         $this->registerCommands();
+        $this->registerComponentHook();
+    }
+
+    /**
+     * Register the Livewire component hook for rate limiting.
+     */
+    protected function registerComponentHook(): void
+    {
+        ComponentHookRegistry::register(RateLimitComponentHook::class);
     }
 
     /**

@@ -7,7 +7,13 @@ interface RateLimiterInterface
     /**
      * Attempt to perform an action within rate limits.
      */
-    public function attempt(string $key, ?string $limiter = null, ?callable $callback = null): mixed;
+    public function attempt(
+        string $key,
+        ?string $limiter = null,
+        ?callable $callback = null,
+        ?int $maxAttempts = null,
+        ?int $decayMinutes = null
+    ): mixed;
 
     /**
      * Check if rate limit would be exceeded without consuming attempt.
@@ -22,7 +28,7 @@ interface RateLimiterInterface
     /**
      * Get retry after time in seconds.
      */
-    public function retryAfter(string $key, ?string $limiter = null): int;
+    public function retryAfter(string $key, ?string $limiter = null, ?int $decayMinutes = null): int;
 
     /**
      * Reset rate limit for a key.

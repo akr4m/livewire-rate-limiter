@@ -25,8 +25,13 @@ class RateLimiterManager implements RateLimiterInterface
     /**
      * Attempt to perform an action within rate limits.
      */
-    public function attempt(string $key, ?string $limiter = null, ?callable $callback = null): mixed
-    {
+    public function attempt(
+        string $key,
+        ?string $limiter = null,
+        ?callable $callback = null,
+        ?int $maxAttempts = null,
+        ?int $decayMinutes = null
+    ): mixed {
         $limiter = $limiter ?? $this->config['default'];
         $limiterConfig = $this->getLimiterConfig($limiter);
 
@@ -37,10 +42,14 @@ class RateLimiterManager implements RateLimiterInterface
         $strategy = $this->getStrategy($limiterConfig['strategy'] ?? 'fixed_window');
         $fullKey = $this->buildKey($key, $limiter);
 
+        // Use attribute values if provided, otherwise fall back to limiter config
+        $effectiveMaxAttempts = $maxAttempts ?? $limiterConfig['attempts'] ?? 60;
+        $effectiveDecayMinutes = $decayMinutes ?? $limiterConfig['decay_minutes'] ?? 1;
+
         $attempt = $strategy->attempt(
             $fullKey,
-            $limiterConfig['attempts'] ?? 60,
-            $limiterConfig['decay_minutes'] ?? 1
+            $effectiveMaxAttempts,
+            $effectiveDecayMinutes
         );
 
         if (!$attempt['allowed']) {
@@ -98,7 +107,7 @@ class RateLimiterManager implements RateLimiterInterface
     /**
      * Get retry after time in seconds.
      */
-    public function retryAfter(string $key, ?string $limiter = null): int
+    public function retryAfter(string $key, ?string $limiter = null, ?int $decayMinutes = null): int
     {
         $limiter = $limiter ?? $this->config['default'];
         $limiterConfig = $this->getLimiterConfig($limiter);
@@ -106,9 +115,11 @@ class RateLimiterManager implements RateLimiterInterface
         $strategy = $this->getStrategy($limiterConfig['strategy'] ?? 'fixed_window');
         $fullKey = $this->buildKey($key, $limiter);
 
+        $effectiveDecayMinutes = $decayMinutes ?? $limiterConfig['decay_minutes'] ?? 1;
+
         return $strategy->retryAfter(
             $fullKey,
-            $limiterConfig['decay_minutes'] ?? 1
+            $effectiveDecayMinutes
         );
     }
 
@@ -187,7 +198,8 @@ class RateLimiterManager implements RateLimiterInterface
      */
     protected function shouldBypass(): bool
     {
-        $bypass = $this->config['bypass'] ?? [];
+        // Read bypass config dynamically to support runtime changes (e.g., in tests)
+        $bypass = config('livewire-rate-limiter.bypass', $this->config['bypass'] ?? []);
 
         // Check environment
         if (isset($bypass['environments']) && in_array(app()->environment(), $bypass['environments'])) {
