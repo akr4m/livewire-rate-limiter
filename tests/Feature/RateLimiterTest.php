@@ -7,7 +7,6 @@ use Akr4m\LivewireRateLimiter\RateLimiterManager;
 use Akr4m\LivewireRateLimiter\Tests\TestCase;
 use Akr4m\LivewireRateLimiter\Tests\Fixtures\TestComponent;
 use Akr4m\LivewireRateLimiter\Tests\Fixtures\RateLimitedComponent;
-use Akr4m\LivewireRateLimiter\Exceptions\RateLimitExceededException;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Event;
 use Akr4m\LivewireRateLimiter\Events\RateLimitExceeded;
